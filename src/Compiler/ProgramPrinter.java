@@ -291,7 +291,7 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterTypeSpecifier(CParser.TypeSpecifierContext ctx) {
-
+//        System.out.println("2");
     }
 
     @Override
@@ -707,17 +707,32 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void exitExternalDeclaration(CParser.ExternalDeclarationContext ctx) {
-
+        this.intendCount--;
+        System.out.println(indentation(this.intendCount) + "}");
     }
 
     @Override
     public void enterFunctionDefinition(CParser.FunctionDefinitionContext ctx) {
+        System.out.print(indentation(this.intendCount));
+
+        String method_name = ctx.declarator().directDeclarator().directDeclarator().getText();
+        String functionName = "name: " + method_name;
+        String method_type = ctx.typeSpecifier().getText();
+        String typeSpecifier = "return type: " + method_type;
+
+        if (method_name.equals("main")){
+            System.out.println("main method: " + typeSpecifier + " {");
+        }else {
+            System.out.println("normal method: " + functionName + "/ " + typeSpecifier + " {");
+        }
+
+        this.intendCount++;
 
     }
 
     @Override
     public void exitFunctionDefinition(CParser.FunctionDefinitionContext ctx) {
-
+        System.out.println(indentation(--this.intendCount) + "}");
     }
 
     @Override
