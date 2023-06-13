@@ -8,7 +8,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class ProgramPrinter  implements CListener {
 
-    int intendCount = 0;
+    int indentCount = 0;
 
     private String indentation(int n) {
         String retIndent = "";
@@ -231,12 +231,28 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterDeclaration(CParser.DeclarationContext ctx) {
+        System.out.print(indentation(this.indentCount) + "field:");
+        this.indentCount++;
 
+        StringBuilder sb = new StringBuilder();
+
+        String type = ctx.declarationSpecifiers().getText();
+
+        for (CParser.InitDeclaratorContext idc: ctx.initDeclaratorList().initDeclarator()) {
+            String name = idc.declarator().directDeclarator().Identifier().getText();
+
+            sb.append(" " + name);
+            sb.append("/ ");
+            sb.append("type: ");
+            sb.append(type);
+        }
+
+        System.out.println(sb.toString());
     }
 
     @Override
     public void exitDeclaration(CParser.DeclarationContext ctx) {
-
+        --this.indentCount;
     }
 
     @Override
@@ -291,7 +307,7 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterTypeSpecifier(CParser.TypeSpecifierContext ctx) {
-//        System.out.println("2");
+
     }
 
     @Override
@@ -484,7 +500,7 @@ public class ProgramPrinter  implements CListener {
 
         StringBuilder sb = new StringBuilder();
 
-        System.out.print(indentation(this.intendCount) + "parameters list: [ ");
+        System.out.print(indentation(this.indentCount) + "parameters list: [ ");
 
         for(CParser.ParameterDeclarationContext cp : ctx.parameterDeclaration()){
             String name = cp.declarator().directDeclarator().Identifier().getText();
@@ -499,14 +515,14 @@ public class ProgramPrinter  implements CListener {
         sb.deleteCharAt(sb.length()-1); // remove last redundant comma
 
         System.out.print(sb.toString());
-        this.intendCount++;
+        this.indentCount++;
 
     }
 
     @Override
     public void exitParameterList(CParser.ParameterListContext ctx) {
         System.out.println(" ]");
-        this.intendCount--;
+        this.indentCount--;
     }
 
     @Override
@@ -725,19 +741,19 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterExternalDeclaration(CParser.ExternalDeclarationContext ctx) {
-        System.out.println(indentation(this.intendCount) + "program start {");
-        this.intendCount++;
+        System.out.println(indentation(this.indentCount) + "program start {");
+        this.indentCount++;
     }
 
     @Override
     public void exitExternalDeclaration(CParser.ExternalDeclarationContext ctx) {
-        this.intendCount--;
-        System.out.println(indentation(this.intendCount) + "}");
+        this.indentCount--;
+        System.out.println(indentation(this.indentCount) + "}");
     }
 
     @Override
     public void enterFunctionDefinition(CParser.FunctionDefinitionContext ctx) {
-        System.out.print(indentation(this.intendCount));
+        System.out.print(indentation(this.indentCount));
 
         String method_name = ctx.declarator().directDeclarator().directDeclarator().getText();
         String functionName = "name: " + method_name;
@@ -750,13 +766,13 @@ public class ProgramPrinter  implements CListener {
             System.out.println("normal method: " + functionName + "/ " + typeSpecifier + " {");
         }
 
-        this.intendCount++;
+        this.indentCount++;
 
     }
 
     @Override
     public void exitFunctionDefinition(CParser.FunctionDefinitionContext ctx) {
-        System.out.println(indentation(--this.intendCount) + "}");
+        System.out.println(indentation(--this.indentCount) + "}");
     }
 
     @Override

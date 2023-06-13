@@ -5,8 +5,10 @@ void myFunction(int myNumbers[5], char isOdd) {
     }
     }
 }
+char c = 'p' , a ='a';
 int main() {
     int myNumbers[5] = {10, 20, 30, 40, 50};
+    double point = 2.3;
     myFunction(myNumbers);
     return 0;
 }
