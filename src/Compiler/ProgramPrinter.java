@@ -28,15 +28,14 @@ public class ProgramPrinter  implements CListener {
     public void exitPrimaryExpression(CParser.PrimaryExpressionContext ctx) {
 
     }
-
+    int n =0;
     @Override
     public void enterPostfixExpression(CParser.PostfixExpressionContext ctx) {
-
     }
 
     @Override
     public void exitPostfixExpression(CParser.PostfixExpressionContext ctx) {
-
+        this.indentCount--;
     }
 
     @Override
@@ -527,10 +526,6 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterParameterDeclaration(CParser.ParameterDeclarationContext ctx) {
-//        String param_name = ctx.declarator().directDeclarator().Identifier().getText();
-//        String param_type = ctx.declarationSpecifiers().getText();
-//
-//        System.out.print(param_name + " " + param_type + ", ");
 
     }
 
@@ -755,7 +750,7 @@ public class ProgramPrinter  implements CListener {
     public void enterFunctionDefinition(CParser.FunctionDefinitionContext ctx) {
         System.out.print(indentation(this.indentCount));
 
-        String method_name = ctx.declarator().directDeclarator().directDeclarator().getText();
+        String method_name = ctx.declarator().directDeclarator().directDeclarator().Identifier().getText();
         String functionName = "name: " + method_name;
         String method_type = ctx.typeSpecifier().getText();
         String typeSpecifier = "return type: " + method_type;
