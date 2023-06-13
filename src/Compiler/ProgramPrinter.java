@@ -482,15 +482,39 @@ public class ProgramPrinter  implements CListener {
     @Override
     public void enterParameterList(CParser.ParameterListContext ctx) {
 
+        StringBuilder sb = new StringBuilder();
+
+        System.out.print(indentation(this.intendCount) + "parameters list: [ ");
+
+        for(CParser.ParameterDeclarationContext cp : ctx.parameterDeclaration()){
+            String name = cp.declarator().directDeclarator().Identifier().getText();
+            String type = cp.declarationSpecifiers().getText();
+
+            sb.append(name);
+            sb.append(" ");
+            sb.append(type);
+            sb.append(", ");
+        }
+        sb.deleteCharAt(sb.length()-1); // remove last redundant space
+        sb.deleteCharAt(sb.length()-1); // remove last redundant comma
+
+        System.out.print(sb.toString());
+        this.intendCount++;
+
     }
 
     @Override
     public void exitParameterList(CParser.ParameterListContext ctx) {
-
+        System.out.println(" ]");
+        this.intendCount--;
     }
 
     @Override
     public void enterParameterDeclaration(CParser.ParameterDeclarationContext ctx) {
+//        String param_name = ctx.declarator().directDeclarator().Identifier().getText();
+//        String param_type = ctx.declarationSpecifiers().getText();
+//
+//        System.out.print(param_name + " " + param_type + ", ");
 
     }
 
