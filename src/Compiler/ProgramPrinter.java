@@ -253,9 +253,16 @@ public class ProgramPrinter  implements CListener {
         System.out.print(indentation(this.indentCount) + "field:");
         this.indentCount++;
 
+        String typeQual = "";
+
         StringBuilder sb = new StringBuilder();
 
-        String type = ctx.declarationSpecifiers().getText();
+        String typeSpec = ctx.declarationSpecifiers().declarationSpecifier(0).getText();
+
+        if(ctx.declarationSpecifiers().declarationSpecifier().size() > 1){
+            typeQual = ctx.declarationSpecifiers().declarationSpecifier(0).getText();
+            typeSpec = ctx.declarationSpecifiers().declarationSpecifier(1).getText();
+        }
 
         for (CParser.InitDeclaratorContext idc: ctx.initDeclaratorList().initDeclarator()) {
             String name = idc.declarator().directDeclarator().Identifier().getText();
@@ -263,7 +270,11 @@ public class ProgramPrinter  implements CListener {
             sb.append(" " + name);
             sb.append("/ ");
             sb.append("type: ");
-            sb.append(type);
+            sb.append(typeSpec);
+            if(ctx.declarationSpecifiers().declarationSpecifier().size()  > 1){
+                sb.append(" typeQ: ");
+                sb.append(typeQual);
+            }
         }
 
         System.out.println(sb.toString());
