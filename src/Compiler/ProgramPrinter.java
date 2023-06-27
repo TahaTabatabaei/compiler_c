@@ -22,6 +22,7 @@ public class ProgramPrinter  implements CListener {
         return retIndent;
     }
 
+    int nestedCounter = 0;
     ArrayList<TerminalNode> methods = new ArrayList<TerminalNode>();
 
     @Override
@@ -706,22 +707,35 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterSelectionStatement(CParser.SelectionStatementContext ctx) {
-
+        nestedCounter++;
+        if(nestedCounter > 1){
+            System.out.println(indentation(this.indentCount++) + "nested statement {");
+        }
     }
 
     @Override
     public void exitSelectionStatement(CParser.SelectionStatementContext ctx) {
-
+        if(nestedCounter > 1){
+            System.out.println(indentation(--this.indentCount) + "}");
+        }
+        nestedCounter--;
     }
 
     @Override
     public void enterIterationStatement(CParser.IterationStatementContext ctx) {
+        nestedCounter++;
 
+        if(nestedCounter > 1){
+            System.out.println(indentation(this.indentCount++) + "nested statement {");
+        }
     }
 
     @Override
     public void exitIterationStatement(CParser.IterationStatementContext ctx) {
-
+        if(nestedCounter > 1){
+            System.out.println(indentation(--this.indentCount) + "}");
+        }
+        nestedCounter--;
     }
 
     @Override
