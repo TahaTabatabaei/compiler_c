@@ -8,9 +8,12 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public class ProgramPrinter  implements CListener {
 
+    GlobalTable programTable= new GlobalTable();
+    Stack<SymbolTable> currentScopes = new Stack<SymbolTable>();
     int indentCount = 0;
 
     private String indentation(int n) {
@@ -531,7 +534,6 @@ public class ProgramPrinter  implements CListener {
         StringBuilder sb = new StringBuilder();
 
         System.out.print(indentation(this.indentCount) + "parameters list: [ ");
-
         for(CParser.ParameterDeclarationContext cp : ctx.parameterDeclaration()){
             String name = cp.declarator().directDeclarator().Identifier().getText();
             String type = cp.declarationSpecifiers().getText();
@@ -791,6 +793,8 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterExternalDeclaration(CParser.ExternalDeclarationContext ctx) {
+        programTable.lineNumber = 1;
+        programTable.tableName = "program";
         System.out.println(indentation(this.indentCount) + "program start {");
         this.indentCount++;
     }

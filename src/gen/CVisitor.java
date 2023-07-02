@@ -1,4 +1,4 @@
-package gen;// Generated from E:/taha/projects/IdeaProjects/compiler_c/grammer\C.g4 by ANTLR 4.12.0
+package gen;// Generated from E:/compiler/project/compiler_c/grammer\C.g4 by ANTLR 4.12.0
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -256,7 +256,7 @@ public interface CVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDeclarator(CParser.DeclaratorContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link CParser#directDeclarator}.
+	 * Visit a parse tree produced by .
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
