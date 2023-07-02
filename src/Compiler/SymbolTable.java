@@ -35,7 +35,7 @@ public class SymbolTable {
         System.out.print(this.toString());
         System.out.println("==============================================");
         if(this instanceof GlobalTable){
-            for (MethodTable method : ((GlobalTable) this).methodes)
+            for (MethodTable method : ((GlobalTable) this).methods)
                 method.tablePrinter();
         }
         else if(this instanceof MethodTable){

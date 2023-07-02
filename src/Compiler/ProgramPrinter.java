@@ -795,6 +795,7 @@ public class ProgramPrinter  implements CListener {
     public void enterExternalDeclaration(CParser.ExternalDeclarationContext ctx) {
         programTable.lineNumber = 1;
         programTable.tableName = "program";
+        currentScopes.add(programTable);
         System.out.println(indentation(this.indentCount) + "program start {");
         this.indentCount++;
     }
@@ -802,11 +803,17 @@ public class ProgramPrinter  implements CListener {
     @Override
     public void exitExternalDeclaration(CParser.ExternalDeclarationContext ctx) {
         this.indentCount--;
+        currentScopes.pop();
         System.out.println(indentation(this.indentCount) + "}");
+        programTable.tablePrinter();
     }
 
     @Override
     public void enterFunctionDefinition(CParser.FunctionDefinitionContext ctx) {
+        String key="";
+        String value = "Method ";
+        MethodTable tempmethod = new MethodTable();
+
         System.out.print(indentation(this.indentCount));
 
         String method_name = ctx.declarator().directDeclarator().directDeclarator().Identifier().getText();
@@ -816,10 +823,19 @@ public class ProgramPrinter  implements CListener {
         String typeSpecifier = "return type: " + method_type;
 
         if (method_name.equals("main")){
+            key = "Method_main";
             System.out.println("main method: " + typeSpecifier + " {");
         }else {
+            key = "Method_"+method_name;
             System.out.println("normal method: " + functionName + "/ " + typeSpecifier + " {");
         }
+        value = key+ " ("+functionName+" ) "+"( returntype : "+method_type+" )";
+        programTable.insert(key, value);
+        programTable.methods.add(tempmethod);
+        tempmethod.parentNode=programTable;
+        tempmethod.lineNumber=ctx.start.getLine();
+        tempmethod.tableName=method_name;
+        currentScopes.push(tempmethod);
 
         this.indentCount++;
 
