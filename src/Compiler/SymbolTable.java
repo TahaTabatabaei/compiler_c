@@ -9,11 +9,6 @@ public class SymbolTable {
     public String tableName="";
     public Hashtable<String,String> map = new Hashtable<String,String>();
 
-    public String toString(){
-        return "------------- " + this.tableName + " : " + this.lineNumber + " -------------\n" +
-                this.printItems() +
-                "-----------------------------------------\n";
-    }
     public String printItems(){
 
         String itemsStr = "";
@@ -31,6 +26,12 @@ public class SymbolTable {
     public String lookUp(String idefName){
         return this.map.get(idefName);
     }
+
+    public String toString(){
+        return "------------- " + this.tableName + " : " + this.lineNumber + " -------------\n" +
+                this.printItems() +
+                "-----------------------------------------\n";
+    }
     public void tablePrinter(){
         System.out.print(this.toString());
         System.out.println("==============================================");
@@ -46,6 +47,16 @@ public class SymbolTable {
             for (BlockTable block : ((BlockTable) this).blocks)
                 block.tablePrinter();
         }
+    }
+
+    public String fieldType(){
+        if(this instanceof GlobalTable){
+            return "GlobalField";
+        }
+        else if(this instanceof MethodTable){
+            return "MethodField";
+        }
+        return "";
     }
 }
 

@@ -256,6 +256,7 @@ public class ProgramPrinter  implements CListener {
         System.out.print(indentation(this.indentCount) + "field:");
         this.indentCount++;
 
+
         String typeQual = "";
 
         StringBuilder sb = new StringBuilder();
@@ -270,16 +271,24 @@ public class ProgramPrinter  implements CListener {
         for (CParser.InitDeclaratorContext idc: ctx.initDeclaratorList().initDeclarator()) {
             String name = idc.declarator().directDeclarator().Identifier().getText();
 
+            StringBuilder key = new StringBuilder();
+            StringBuilder value = new StringBuilder();
+
+            key.append("Field_" + name);
+            value.append(" " + currentScopes.peek().fieldType() + "(name : "+ name + ")" + " (type : "+typeSpec );
             sb.append(" " + name);
             sb.append("/ ");
             sb.append("type: ");
             sb.append(typeSpec);
             if(ctx.declarationSpecifiers().declarationSpecifier().size()  > 1){
+                value.append(" ," + "typeQ : "+ typeQual);
                 sb.append(" typeQ: ");
                 sb.append(typeQual);
             }
-        }
+            value.append(")");
 
+            currentScopes.peek().insert(key.toString(), value.toString());
+        }
         System.out.println(sb.toString());
     }
 
@@ -829,10 +838,10 @@ public class ProgramPrinter  implements CListener {
             key = "Method_"+method_name;
             System.out.println("normal method: " + functionName + "/ " + typeSpecifier + " {");
         }
-        value = key+ " ("+functionName+" ) "+"( returntype : "+method_type+" )";
-        programTable.insert(key, value);
-        programTable.methods.add(tempmethod);
-        tempmethod.parentNode=programTable;
+        value = key+ " ("+functionName+" ) "+"( return type : "+method_type+" )";
+        currentScopes.peek().insert(key, value);
+        ((GlobalTable)currentScopes.peek()).methods.add(tempmethod);
+        tempmethod.parentNode=currentScopes.peek();
         tempmethod.lineNumber=ctx.start.getLine();
         tempmethod.tableName=method_name;
         currentScopes.push(tempmethod);
@@ -843,6 +852,7 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void exitFunctionDefinition(CParser.FunctionDefinitionContext ctx) {
+        currentScopes.pop();
         System.out.println(indentation(--this.indentCount) + "}");
     }
 
