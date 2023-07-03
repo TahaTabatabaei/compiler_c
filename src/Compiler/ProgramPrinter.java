@@ -544,13 +544,28 @@ public class ProgramPrinter  implements CListener {
 
         System.out.print(indentation(this.indentCount) + "parameters list: [ ");
         for(CParser.ParameterDeclarationContext cp : ctx.parameterDeclaration()){
+
+            StringBuilder key = new StringBuilder();
+            StringBuilder value = new StringBuilder();
+
             String name = cp.declarator().directDeclarator().Identifier().getText();
             String type = cp.declarationSpecifiers().getText();
+
+            key.append("Field_" + name);
+
+            if (cp.declarator().directDeclarator().Constant().size() > 0){
+                value.append("methodParamField" + "(name: " + name + ")" + "(type: "+ type + " array, " + "length = " +
+                        cp.declarator().directDeclarator().Constant(0) + ")");
+            }else {
+                value.append("methodParamField" + "(name: " + name + ")" + "(type: "+ type + ")");
+            }
 
             sb.append(name);
             sb.append(" ");
             sb.append(type);
             sb.append(", ");
+
+            currentScopes.peek().insert(key.toString(), value.toString());
         }
         sb.deleteCharAt(sb.length()-1); // remove last redundant space
         sb.deleteCharAt(sb.length()-1); // remove last redundant comma
@@ -729,6 +744,19 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterSelectionStatement(CParser.SelectionStatementContext ctx) {
+        BlockTable tempIf = new BlockTable();
+        tempIf.parentNode = currentScopes.peek();
+        tempIf.lineNumber = ctx.start.getLine();
+        tempIf.tableName = "if_nested";
+            
+        if (currentScopes.peek() instanceof MethodTable){
+            ((MethodTable)currentScopes.peek()).blocks.add(tempIf);
+
+        }else {
+            ((BlockTable)currentScopes.peek()).blocks.add(tempIf);
+        }
+        currentScopes.push(tempIf);
+
         nestedCounter++;
         if(nestedCounter > 1){
             System.out.println(indentation(this.indentCount++) + "nested statement {");
@@ -737,6 +765,8 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void exitSelectionStatement(CParser.SelectionStatementContext ctx) {
+        currentScopes.pop();
+
         if(nestedCounter > 1){
             System.out.println(indentation(--this.indentCount) + "}");
         }
@@ -745,6 +775,19 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterIterationStatement(CParser.IterationStatementContext ctx) {
+        BlockTable tempLoop = new BlockTable();
+        tempLoop.parentNode = currentScopes.peek();
+        tempLoop.lineNumber = ctx.start.getLine();
+        tempLoop.tableName = "loop_nested";
+
+        if (currentScopes.peek() instanceof MethodTable){
+            ((MethodTable)currentScopes.peek()).blocks.add(tempLoop);
+
+        }else {
+            ((BlockTable)currentScopes.peek()).blocks.add(tempLoop);
+        }
+        currentScopes.push(tempLoop);
+
         nestedCounter++;
 
         if(nestedCounter > 1){
@@ -754,6 +797,8 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void exitIterationStatement(CParser.IterationStatementContext ctx) {
+        currentScopes.pop();
+
         if(nestedCounter > 1){
             System.out.println(indentation(--this.indentCount) + "}");
         }
@@ -820,7 +865,7 @@ public class ProgramPrinter  implements CListener {
     @Override
     public void enterFunctionDefinition(CParser.FunctionDefinitionContext ctx) {
         String key="";
-        String value = "Method ";
+        StringBuilder value = new StringBuilder();
         MethodTable tempmethod = new MethodTable();
 
         System.out.print(indentation(this.indentCount));
@@ -838,12 +883,31 @@ public class ProgramPrinter  implements CListener {
             key = "Method_"+method_name;
             System.out.println("normal method: " + functionName + "/ " + typeSpecifier + " {");
         }
-        value = key+ " ("+functionName+" ) "+"( return type : "+method_type+" )";
-        currentScopes.peek().insert(key, value);
-        ((GlobalTable)currentScopes.peek()).methods.add(tempmethod);
+        value.append( key+ " ("+functionName+" ) "+"( return type : "+method_type+" )");
+
+        if (ctx.declarator().directDeclarator().parameterTypeList() != null){
+            value.append(" [parameter list: ");
+            int index = 0;
+            for(CParser.ParameterDeclarationContext param :
+                    ctx.declarator().directDeclarator().parameterTypeList().parameterList().parameterDeclaration() ){
+                String type = param.declarationSpecifiers().getText();
+                if (index != 0){
+                    value.append(", ");
+                }
+                if (param.declarator().directDeclarator().Constant().size() > 0){
+                    value.append("[type: " + type + " array, index:" + index + "]");
+                }else {
+                    value.append("[type: " + type + " , index:" + index + "]");
+                }
+                index++;
+            }
+            value.append("]");
+        }
+        currentScopes.peek().insert(key, value.toString());
         tempmethod.parentNode=currentScopes.peek();
         tempmethod.lineNumber=ctx.start.getLine();
         tempmethod.tableName=method_name;
+        ((GlobalTable)currentScopes.peek()).methods.add(tempmethod);
         currentScopes.push(tempmethod);
 
         this.indentCount++;

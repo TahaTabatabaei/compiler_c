@@ -56,6 +56,9 @@ public class SymbolTable {
         else if(this instanceof MethodTable){
             return "MethodField";
         }
+        else if(this instanceof BlockTable){
+            return "BlockField";
+        }
         return "";
     }
 }
