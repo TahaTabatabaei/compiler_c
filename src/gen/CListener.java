@@ -1,4 +1,4 @@
-package gen;// Generated from E:/taha/projects/IdeaProjects/compiler_c/grammer\C.g4 by ANTLR 4.12.0
+package gen;// Generated from E:/compiler/project/compiler_c/grammer\C.g4 by ANTLR 4.12.0
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**
@@ -417,12 +417,12 @@ public interface CListener extends ParseTreeListener {
 	 */
 	void exitDeclarator(CParser.DeclaratorContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link CParser#directDeclarator}.
+	 * Enter a parse tree produced by .
 	 * @param ctx the parse tree
 	 */
 	void enterDirectDeclarator(CParser.DirectDeclaratorContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link CParser#directDeclarator}.
+	 * Exit a parse tree produced by .
 	 * @param ctx the parse tree
 	 */
 	void exitDirectDeclarator(CParser.DirectDeclaratorContext ctx);

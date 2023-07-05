@@ -13,6 +13,7 @@ void myFunction(int myNumbers[5], char isOdd) {
 }
 char c = 'p' , a ='a';
 int main() {
+    double point = 1.9;
     int myNumbers[5] = {10, 20, 30, 40, 50};
     double point = 2.3;
     point = 2;

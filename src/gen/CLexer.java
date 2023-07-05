@@ -1,4 +1,4 @@
-package gen;// Generated from E:/taha/projects/IdeaProjects/compiler_c/grammer\C.g4 by ANTLR 4.12.0
+package gen;// Generated from E:/compiler/project/compiler_c/grammer\C.g4 by ANTLR 4.12.0
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
