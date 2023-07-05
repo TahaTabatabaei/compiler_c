@@ -7,11 +7,11 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Stack;
 
 public class ProgramPrinter  implements CListener {
 
+    ErrorHandler errorHandler = new ErrorHandler();
     GlobalTable programTable= new GlobalTable();
     Stack<SymbolTable> currentScopes = new Stack<SymbolTable>();
     int indentCount = 0;
@@ -287,6 +287,13 @@ public class ProgramPrinter  implements CListener {
             }
             value.append(")");
 
+            if (currentScopes.peek().map.containsKey(key.toString()) &&
+                    currentScopes.peek().lookUp(key.toString()).contains(typeSpec)){
+                String message = errorHandler.errorMaker(104, "field", ctx.start.getLine(),ctx.start.getCharPositionInLine()
+                        ,name,"has been defined already");
+                errorHandler.errors.add(message);
+                key.append( "_"+ctx.start.getLine()+"_"+ctx.start.getCharPositionInLine());
+            }
             currentScopes.peek().insert(key.toString(), value.toString());
         }
         System.out.println(sb.toString());
@@ -583,6 +590,7 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterParameterDeclaration(CParser.ParameterDeclarationContext ctx) {
+//        System.out.println(ctx.getText());
 
     }
 
@@ -741,14 +749,13 @@ public class ProgramPrinter  implements CListener {
     public void exitExpressionStatement(CParser.ExpressionStatementContext ctx) {
         this.indentCount--;
     }
-
     @Override
     public void enterSelectionStatement(CParser.SelectionStatementContext ctx) {
         BlockTable tempIf = new BlockTable();
         tempIf.parentNode = currentScopes.peek();
         tempIf.lineNumber = ctx.start.getLine();
         tempIf.tableName = "if_nested";
-            
+
         if (currentScopes.peek() instanceof MethodTable){
             ((MethodTable)currentScopes.peek()).blocks.add(tempIf);
 
@@ -860,6 +867,7 @@ public class ProgramPrinter  implements CListener {
         currentScopes.pop();
         System.out.println(indentation(this.indentCount) + "}");
         programTable.tablePrinter();
+        errorHandler.printErrors();
     }
 
     @Override
@@ -883,6 +891,13 @@ public class ProgramPrinter  implements CListener {
             key = "Method_"+method_name;
             System.out.println("normal method: " + functionName + "/ " + typeSpecifier + " {");
         }
+        if (currentScopes.peek().map.containsKey(key) ){
+            String message = errorHandler.errorMaker(102, "method", ctx.start.getLine(),ctx.start.getCharPositionInLine()
+                    ,functionName,"has been defined already");
+            errorHandler.errors.add(message);
+            key += "_"+ctx.start.getLine()+"_"+ctx.start.getCharPositionInLine();
+        }
+
         value.append( key+ " ("+functionName+" ) "+"( return type : "+method_type+" )");
 
         if (ctx.declarator().directDeclarator().parameterTypeList() != null){
