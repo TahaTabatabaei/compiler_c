@@ -1,7 +1,7 @@
 #include "lib.h"
 
 const double pointer = 10.11;
-void myFunction(int myNumbers[5], char isOdd) {
+void myFunction(int myNumbers[5]) {
     printf("%s", "kir");
 }
 void myFunction(int myNumbers[5], char isOdd) {
@@ -16,7 +16,7 @@ void myFunction(int myNumbers[5], char isOdd) {
 }
 char c = 'p' , a ='a';
 int main() {
-    int point = 1.9;
+    double point = 1.9;
     int myNumbers[5] = {10, 20, 30, 40, 50};
     double point = 2.3;
     myFunction(myNumbers);

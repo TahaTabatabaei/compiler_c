@@ -891,33 +891,48 @@ public class ProgramPrinter  implements CListener {
             key = "Method_"+method_name;
             System.out.println("normal method: " + functionName + "/ " + typeSpecifier + " {");
         }
-        if (currentScopes.peek().map.containsKey(key) ){
-            String message = errorHandler.errorMaker(102, "method", ctx.start.getLine(),ctx.start.getCharPositionInLine()
-                    ,functionName,"has been defined already");
-            errorHandler.errors.add(message);
-            key += "_"+ctx.start.getLine()+"_"+ctx.start.getCharPositionInLine();
-        }
 
-        value.append( key+ " ("+functionName+" ) "+"( return type : "+method_type+" )");
 
+
+        StringBuilder checkParam = new StringBuilder();
         if (ctx.declarator().directDeclarator().parameterTypeList() != null){
-            value.append(" [parameter list: ");
+            checkParam.append(" [parameter list: ");
             int index = 0;
             for(CParser.ParameterDeclarationContext param :
                     ctx.declarator().directDeclarator().parameterTypeList().parameterList().parameterDeclaration() ){
                 String type = param.declarationSpecifiers().getText();
                 if (index != 0){
-                    value.append(", ");
+                    checkParam.append(", ");
                 }
                 if (param.declarator().directDeclarator().Constant().size() > 0){
-                    value.append("[type: " + type + " array, index:" + index + "]");
+                    checkParam.append("[type: " + type + " array, index:" + index + "]");
                 }else {
-                    value.append("[type: " + type + " , index:" + index + "]");
+                    checkParam.append("[type: " + type + " , index:" + index + "]");
                 }
                 index++;
             }
-            value.append("]");
+            checkParam.append("]");
+        }else {
+            checkParam.append("kir shodi");
         }
+
+        if (currentScopes.peek().map.containsKey(key) &&
+                currentScopes.peek().lookUp(key).contains(typeSpecifier) &&
+                currentScopes.peek().lookUp(key).contains(checkParam.toString())){
+
+            String message = errorHandler.errorMaker(102, "method", ctx.start.getLine(),ctx.start.getCharPositionInLine()
+                    ,functionName,"has been defined already");
+            errorHandler.errors.add(message);
+            key += "_"+ctx.start.getLine()+"_"+ctx.start.getCharPositionInLine();
+        } else if (currentScopes.peek().map.containsKey(key)) {
+            key += "_"+ctx.start.getLine()+"_"+ctx.start.getCharPositionInLine();
+        }
+
+        value.append( key+ " ("+functionName+" ) "+"( "+typeSpecifier+" )");
+        if (!checkParam.toString().equals("kir shodi")){
+            value.append(checkParam);
+        }
+
         currentScopes.peek().insert(key, value.toString());
         tempmethod.parentNode=currentScopes.peek();
         tempmethod.lineNumber=ctx.start.getLine();
