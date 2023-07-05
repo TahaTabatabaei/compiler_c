@@ -38,23 +38,36 @@ public class ProgramPrinter  implements CListener {
     @Override
     public void enterPostfixExpression(CParser.PostfixExpressionContext ctx) {
 
-        StringBuilder sb = new StringBuilder();
+        if (!ctx.LeftParen().isEmpty() && !ctx.RightParen().isEmpty()){
+            System.out.print(indentation(this.indentCount++) + "function call: ");
 
-        int index = 0;
-        for (CParser.ArgumentExpressionListContext arex : ctx.argumentExpressionList()){
-            for (CParser.AssignmentExpressionContext asex : arex.assignmentExpression()) {
-                String param = asex.getText();
-                sb.append(" " + param + " (index= " + index++ + ")");
+            String name = ctx.primaryExpression().Identifier().getText();
+
+            System.out.print("name: " + name + "/ params: ");
+
+            StringBuilder sb = new StringBuilder();
+
+            int index = 0;
+            for (CParser.ArgumentExpressionListContext arex : ctx.argumentExpressionList()){
+                for (CParser.AssignmentExpressionContext asex : arex.assignmentExpression()) {
+                    String param = asex.getText();
+                    sb.append(" " + param + " (index= " + index++ + ")");
+                }
+            }
+
+            if (index>0){
+                System.out.println(sb.toString());
             }
         }
 
-        if (index>0){
-            System.out.println(sb.toString());
-        }
+
     }
 
     @Override
     public void exitPostfixExpression(CParser.PostfixExpressionContext ctx) {
+        if (!ctx.LeftParen().isEmpty() && !ctx.RightParen().isEmpty()) {
+            this.indentCount--;
+        }
 
     }
 
@@ -697,23 +710,12 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterExpressionStatement(CParser.ExpressionStatementContext ctx) {
-        System.out.print(indentation(this.indentCount++) + "function call: ");
-
-        StringBuilder sb = new StringBuilder();
-
-        String name = ctx.expression().assignmentExpression(0).conditionalExpression().logicalOrExpression().logicalAndExpression(0).inclusiveOrExpression(0)
-                .exclusiveOrExpression(0).andExpression(0).equalityExpression(0).relationalExpression(0).shiftExpression(0).additiveExpression(0)
-           .multiplicativeExpression(0).castExpression(0).unaryExpression().postfixExpression().primaryExpression().Identifier().getText();
-
-        sb.append("name: " + name + "/ params: ");
-
-        System.out.print(sb.toString());
 
     }
 
     @Override
     public void exitExpressionStatement(CParser.ExpressionStatementContext ctx) {
-        this.indentCount--;
+
     }
 
     @Override

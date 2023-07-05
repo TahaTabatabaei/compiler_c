@@ -15,7 +15,9 @@ char c = 'p' , a ='a';
 int main() {
     int myNumbers[5] = {10, 20, 30, 40, 50};
     double point = 2.3;
+    point = 2;
     myFunction(myNumbers);
-    }
+
+    double data = myFunction(myNum);
     return 0;
-}
+    }
