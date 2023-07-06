@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 public class ProgramPrinter  implements CListener {
-
     ErrorHandler errorHandler = new ErrorHandler();
     GlobalTable programTable= new GlobalTable();
     Stack<SymbolTable> currentScopes = new Stack<SymbolTable>();
@@ -40,7 +39,6 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterPostfixExpression(CParser.PostfixExpressionContext ctx) {
-
         if (!ctx.LeftParen().isEmpty() && !ctx.RightParen().isEmpty()){
             System.out.print(indentation(this.indentCount++) + "function call: ");
 
@@ -266,8 +264,8 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterDeclaration(CParser.DeclarationContext ctx) {
+
         System.out.print(indentation(this.indentCount) + "field:");
-        this.indentCount++;
 
 
         String typeQual = "";
@@ -299,7 +297,7 @@ public class ProgramPrinter  implements CListener {
                 sb.append(typeQual);
             }
             value.append(")");
-
+            value.append("line_number = "+ctx.start.getLine()+"");
             if (currentScopes.peek().map.containsKey(key.toString()) &&
                     currentScopes.peek().lookUp(key.toString()).contains(typeSpec)){
                 String message = errorHandler.errorMaker(104, "field", ctx.start.getLine(),ctx.start.getCharPositionInLine()
@@ -307,6 +305,7 @@ public class ProgramPrinter  implements CListener {
                 errorHandler.errors.add(message);
                 key.append( "_"+ctx.start.getLine()+"_"+ctx.start.getCharPositionInLine());
             }
+
             currentScopes.peek().insert(key.toString(), value.toString());
         }
         System.out.println(sb.toString());
@@ -314,12 +313,10 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void exitDeclaration(CParser.DeclarationContext ctx) {
-        --this.indentCount;
     }
 
     @Override
     public void enterDeclarationSpecifiers(CParser.DeclarationSpecifiersContext ctx) {
-
     }
 
     @Override
@@ -329,7 +326,6 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterDeclarationSpecifier(CParser.DeclarationSpecifierContext ctx) {
-
     }
 
     @Override
@@ -339,7 +335,6 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterInitDeclaratorList(CParser.InitDeclaratorListContext ctx) {
-
     }
 
     @Override
@@ -767,7 +762,7 @@ public class ProgramPrinter  implements CListener {
         currentScopes.push(tempIf);
 
         nestedCounter++;
-        if(nestedCounter > 1){
+        if(nestedCounter >= 1){
             System.out.println(indentation(this.indentCount++) + "nested statement {");
         }
     }
@@ -776,7 +771,7 @@ public class ProgramPrinter  implements CListener {
     public void exitSelectionStatement(CParser.SelectionStatementContext ctx) {
         currentScopes.pop();
 
-        if(nestedCounter > 1){
+        if(nestedCounter >= 1){
             System.out.println(indentation(--this.indentCount) + "}");
         }
         nestedCounter--;
@@ -784,6 +779,7 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterIterationStatement(CParser.IterationStatementContext ctx) {
+
         BlockTable tempLoop = new BlockTable();
         tempLoop.parentNode = currentScopes.peek();
         tempLoop.lineNumber = ctx.start.getLine();
@@ -796,19 +792,18 @@ public class ProgramPrinter  implements CListener {
             ((BlockTable)currentScopes.peek()).blocks.add(tempLoop);
         }
         currentScopes.push(tempLoop);
-
         nestedCounter++;
-
-        if(nestedCounter > 1){
+        if(nestedCounter >= 1){
             System.out.println(indentation(this.indentCount++) + "nested statement {");
         }
+
     }
 
     @Override
     public void exitIterationStatement(CParser.IterationStatementContext ctx) {
         currentScopes.pop();
 
-        if(nestedCounter > 1){
+        if(nestedCounter >= 1){
             System.out.println(indentation(--this.indentCount) + "}");
         }
         nestedCounter--;
@@ -826,6 +821,51 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterForDeclaration(CParser.ForDeclarationContext ctx) {
+            System.out.print(indentation(this.indentCount) + "field:");
+
+
+            String typeQual = "";
+
+            StringBuilder sb = new StringBuilder();
+
+            String typeSpec = ctx.declarationSpecifiers().declarationSpecifier(0).getText();
+
+            if(ctx.declarationSpecifiers().declarationSpecifier().size() > 1){
+                typeQual = ctx.declarationSpecifiers().declarationSpecifier(0).getText();
+                typeSpec = ctx.declarationSpecifiers().declarationSpecifier(1).getText();
+            }
+
+            for (CParser.InitDeclaratorContext idc: ctx.initDeclaratorList().initDeclarator()) {
+                String name = idc.declarator().directDeclarator().Identifier().getText();
+
+                StringBuilder key = new StringBuilder();
+                StringBuilder value = new StringBuilder();
+
+                key.append("Field_" + name);
+                value.append(" " + currentScopes.peek().fieldType() + "(name : "+ name + ")" + " (type : "+typeSpec );
+                sb.append(" " + name);
+                sb.append("/ ");
+                sb.append("type: ");
+                sb.append(typeSpec);
+                if(ctx.declarationSpecifiers().declarationSpecifier().size()  > 1){
+                    value.append(" ," + "typeQ : "+ typeQual);
+                    sb.append(" typeQ: ");
+                    sb.append(typeQual);
+                }
+                value.append(")");
+                value.append("line_number = "+ctx.start.getLine()+"");
+
+                if (currentScopes.peek().map.containsKey(key.toString()) &&
+                        currentScopes.peek().lookUp(key.toString()).contains(typeSpec)){
+                    String message = errorHandler.errorMaker(104, "field", ctx.start.getLine(),ctx.start.getCharPositionInLine()
+                            ,name,"has been defined already");
+                    errorHandler.errors.add(message);
+                    key.append( "_"+ctx.start.getLine()+"_"+ctx.start.getCharPositionInLine());
+                }
+                currentScopes.peek().insert(key.toString(), value.toString());
+            }
+            System.out.println(sb.toString());
+
 
     }
 
@@ -933,12 +973,13 @@ public class ProgramPrinter  implements CListener {
         value.append( key+ " ("+functionName+" ) "+"( "+typeSpecifier+" )");
         if (!checkParam.toString().equals("kir shodi")){
             value.append(checkParam);
+            tempmethod.paramList = checkParam.toString();
         }
 
         currentScopes.peek().insert(key, value.toString());
         tempmethod.parentNode=currentScopes.peek();
         tempmethod.lineNumber=ctx.start.getLine();
-        tempmethod.tableName=method_name;
+        tempmethod.tableName=key;
         ((GlobalTable)currentScopes.peek()).methods.add(tempmethod);
         currentScopes.push(tempmethod);
 
