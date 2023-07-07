@@ -14,6 +14,7 @@ public class ProgramPrinter  implements CListener {
     GlobalTable programTable= new GlobalTable();
     Stack<SymbolTable> currentScopes = new Stack<SymbolTable>();
     int indentCount = 0;
+    private String retrunType;
 
     private String indentation(int n) {
         String retIndent = "";
@@ -36,12 +37,31 @@ public class ProgramPrinter  implements CListener {
         return false;
     }
 
+    String getValue(String key){
+        SymbolTable st = currentScopes.peek();
+        while (st != null) {
+            if (st.map.containsKey(key)){
+                return st.map.get(key).toString();
+            }
+            st = st.parentNode;
+        }
+        return "";
+    }
+
+    // flag to see if we should look for valid return type or not
+    boolean return_flag = false;
+    // flag to see if we should compare the returnType and function return attribute
+    boolean isReturn_flag = false;
+    int lineNum = 0, colNum = 0;
+
+
     int nestedCounter = 0;
     ArrayList<TerminalNode> methods = new ArrayList<TerminalNode>();
 
     @Override
     public void enterPrimaryExpression(CParser.PrimaryExpressionContext ctx) {
 
+        String value = "";
         if(ctx.Identifier() != null){
             String identifier = ctx.Identifier().getText();
 
@@ -60,7 +80,23 @@ public class ProgramPrinter  implements CListener {
                 errorHandler.errors.add(message);
 
                 }
+            }else{
+                value = getValue(varKey.toString());
             }
+        }
+
+        if (return_flag){
+            this.isReturn_flag = true;
+            if(ctx.Identifier() != null){
+                this.retrunType = value;
+            }else if (ctx.Constant() != null){
+                this.retrunType = "constant";
+            }else if (ctx.StringLiteral().size() > 0){
+                this.retrunType = "char";
+            }
+            // get line and column index
+            this.lineNum = ctx.start.getLine();
+            this.colNum = ctx.start.getCharPositionInLine();
         }
     }
 
@@ -630,7 +666,6 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterParameterDeclaration(CParser.ParameterDeclarationContext ctx) {
-//        System.out.println(ctx.getText());
 
     }
 
@@ -792,7 +827,7 @@ public class ProgramPrinter  implements CListener {
             ((BlockTable)currentScopes.peek()).blocks.add(tempIf);
         }
         currentScopes.push(tempIf);
-
+//        TODO: if and else separate
         nestedCounter++;
         if(nestedCounter >= 1){
             System.out.println(indentation(this.indentCount++) + "nested statement {");
@@ -918,12 +953,18 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterJumpStatement(CParser.JumpStatementContext ctx) {
-
+        // jump statement means that we should look for return
+        if(ctx.Return() != null) {
+            this.return_flag = true;
+        }
     }
 
     @Override
     public void exitJumpStatement(CParser.JumpStatementContext ctx) {
-
+        if(ctx.Return() != null) {
+            this.return_flag = false;
+            System.out.println("qqqqqqqqqqqqqq");
+        }
     }
 
     @Override
@@ -987,7 +1028,7 @@ public class ProgramPrinter  implements CListener {
             }
             checkParam.append("]");
         }else {
-            checkParam.append("kir shodi");
+            checkParam.append("approved");
         }
 
         if (currentScopes.peek().map.containsKey(key) &&
@@ -1003,7 +1044,7 @@ public class ProgramPrinter  implements CListener {
         }
 
         value.append( key+ " ("+functionName+" ) "+"( "+typeSpecifier+" )");
-        if (!checkParam.toString().equals("kir shodi")){
+        if (!checkParam.toString().equals("approved")){
             value.append(checkParam);
             tempmethod.paramList = checkParam.toString();
         }
@@ -1023,6 +1064,31 @@ public class ProgramPrinter  implements CListener {
     public void exitFunctionDefinition(CParser.FunctionDefinitionContext ctx) {
         currentScopes.pop();
         System.out.println(indentation(--this.indentCount) + "}");
+
+        if (this.isReturn_flag){
+
+            String type = ctx.typeSpecifier().getText();
+            if (!this.retrunType.contains(type)){
+                String message = errorHandler.errorMaker(210,"",this.lineNum
+                        ,this.colNum," Return Type of this method must be ","< " + type + " >");
+                errorHandler.errors.add(message);
+            }else
+            if(this.retrunType.equals("constant")){
+                if (!(type.equals("int") || type.equals("double"))){
+                    String message = errorHandler.errorMaker(210,"",ctx.start.getCharPositionInLine()
+                            ,ctx.start.getCharPositionInLine()," ReturnType of this method must be ","< constant >");
+                    errorHandler.errors.add(message);
+                }
+            }else
+            if (this.retrunType.equals("char")){
+                String message = errorHandler.errorMaker(210,"",ctx.start.getCharPositionInLine()
+                        ,ctx.start.getCharPositionInLine()," ReturnType of this method must be ","< char >");
+                errorHandler.errors.add(message);
+            }
+        }
+        this.isReturn_flag = false;
+
+
     }
 
     @Override

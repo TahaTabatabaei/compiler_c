@@ -6,9 +6,13 @@ void myFunction(int myNumbers[5], char isOdd) {
     if(isOdd == 'y'){
     printf("%d\n", myNumbers[i]);
     while(x>=2){
-    int nested = 2;
+    nestedVar = 0;
+    int nestedVar = 2;
+    nestedVar = 3;
     my2Func();
     }
+    }else{
+    char zed = 'z';
     }
     }
 }
@@ -23,8 +27,9 @@ int main() {
     data = myFunction(myNum);
     data = data2;
 
-    double point = 2.3;
-    return 0;
+    int point = 2;
+    double x = 2;
+    return x;
     }
 
 
