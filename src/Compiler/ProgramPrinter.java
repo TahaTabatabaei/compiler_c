@@ -31,6 +31,30 @@ public class ProgramPrinter  implements CListener {
     @Override
     public void enterPrimaryExpression(CParser.PrimaryExpressionContext ctx) {
 
+        // invokeState of identifier
+        if(ctx.Identifier() != null){
+            String identifier = ctx.Identifier().getText();
+
+            // check if it is variable name existing in table
+            StringBuilder varKey = new StringBuilder();
+            StringBuilder funcKey = new StringBuilder();
+
+            varKey.append("Field_" + identifier);
+
+            if (!currentScopes.peek().map.containsKey(varKey.toString()) && !currentScopes.peek().parentNode.map.containsKey(varKey.toString())){
+//                funcKey.append("Method_" + identifier);
+//                if(!currentScopes.peek().map.containsKey(funcKey.toString())){
+                    String message = errorHandler.errorMaker(106,"\"Undefined variable:",ctx.start.getLine()
+                            ,ctx.start.getCharPositionInLine(),identifier,"\" can not find variable/method.");
+                                errorHandler.errors.add(message);
+
+//                }
+            }else {
+                System.out.println("oooooookkkkkkk: "  + identifier);
+            }
+        }
+
+
     }
 
     @Override
@@ -876,7 +900,7 @@ public class ProgramPrinter  implements CListener {
     public void enterFunctionDefinition(CParser.FunctionDefinitionContext ctx) {
         String key="";
         StringBuilder value = new StringBuilder();
-        MethodTable tempmethod = new MethodTable();
+        MethodTable tempMethod = new MethodTable();
 
         System.out.print(indentation(this.indentCount));
 
@@ -915,7 +939,7 @@ public class ProgramPrinter  implements CListener {
             }
             checkParam.append("]");
         }else {
-            checkParam.append("kir shodi");
+            checkParam.append("approved");
         }
 
         if (currentScopes.peek().map.containsKey(key) &&
@@ -931,16 +955,16 @@ public class ProgramPrinter  implements CListener {
         }
 
         value.append( key+ " ("+functionName+" ) "+"( "+typeSpecifier+" )");
-        if (!checkParam.toString().equals("kir shodi")){
+        if (!checkParam.toString().equals("approved")){
             value.append(checkParam);
         }
 
         currentScopes.peek().insert(key, value.toString());
-        tempmethod.parentNode=currentScopes.peek();
-        tempmethod.lineNumber=ctx.start.getLine();
-        tempmethod.tableName=method_name;
-        ((GlobalTable)currentScopes.peek()).methods.add(tempmethod);
-        currentScopes.push(tempmethod);
+        tempMethod.parentNode=currentScopes.peek();
+        tempMethod.lineNumber=ctx.start.getLine();
+        tempMethod.tableName=method_name;
+        ((GlobalTable)currentScopes.peek()).methods.add(tempMethod);
+        currentScopes.push(tempMethod);
 
         this.indentCount++;
 
