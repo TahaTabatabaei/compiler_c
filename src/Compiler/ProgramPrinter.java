@@ -60,8 +60,6 @@ public class ProgramPrinter  implements CListener {
                 errorHandler.errors.add(message);
 
                 }
-            }else {
-                System.out.println("oooooookkkkkkk: "  + identifier);
             }
         }
     }
