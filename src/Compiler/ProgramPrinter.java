@@ -24,12 +24,46 @@ public class ProgramPrinter  implements CListener {
         return retIndent;
     }
 
+    // search method to find a key in HashTables
+    boolean searchKey(String key){
+        SymbolTable st = currentScopes.peek();
+        while (st != null) {
+            if (st.map.containsKey(key)){
+                return true;
+            }
+            st = st.parentNode;
+        }
+        return false;
+    }
+
     int nestedCounter = 0;
     ArrayList<TerminalNode> methods = new ArrayList<TerminalNode>();
 
     @Override
     public void enterPrimaryExpression(CParser.PrimaryExpressionContext ctx) {
 
+        if(ctx.Identifier() != null){
+            String identifier = ctx.Identifier().getText();
+
+
+            StringBuilder varKey = new StringBuilder();
+            StringBuilder funcKey = new StringBuilder();
+
+            varKey.append("Field_" + identifier);
+            // check if it is variable name existing in table
+            if (!searchKey(varKey.toString())){
+                // check if it is variable name existing in table
+                funcKey.append("Method_" + identifier);
+                if(!searchKey(funcKey.toString())){
+                String message = errorHandler.errorMaker(106,"\"Undefined variable:",ctx.start.getLine()
+                        ,ctx.start.getCharPositionInLine(),identifier,"\" can not find variable/method.");
+                errorHandler.errors.add(message);
+
+                }
+            }else {
+                System.out.println("oooooookkkkkkk: "  + identifier);
+            }
+        }
     }
 
     @Override
