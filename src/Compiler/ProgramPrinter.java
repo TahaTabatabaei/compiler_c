@@ -14,7 +14,8 @@ public class ProgramPrinter  implements CListener {
     GlobalTable programTable= new GlobalTable();
     Stack<SymbolTable> currentScopes = new Stack<SymbolTable>();
     int indentCount = 0;
-    private String retrunType;
+    private String returnType;
+
 
     private String indentation(int n) {
         String retIndent = "";
@@ -54,6 +55,9 @@ public class ProgramPrinter  implements CListener {
     boolean isReturn_flag = false;
     int lineNum = 0, colNum = 0;
 
+//    private String initializerType;
+//    private boolean init_flag;
+
 
     int nestedCounter = 0;
     ArrayList<TerminalNode> methods = new ArrayList<TerminalNode>();
@@ -88,16 +92,27 @@ public class ProgramPrinter  implements CListener {
         if (return_flag){
             this.isReturn_flag = true;
             if(ctx.Identifier() != null){
-                this.retrunType = value;
+                this.returnType = value;
             }else if (ctx.Constant() != null){
-                this.retrunType = "constant";
+                this.returnType = "constant";
             }else if (ctx.StringLiteral().size() > 0){
-                this.retrunType = "char";
+                this.returnType = "char";
             }
             // get line and column index
             this.lineNum = ctx.start.getLine();
             this.colNum = ctx.start.getCharPositionInLine();
         }
+
+//        if (init_flag){
+////            this.isReturn_flag = true;
+//            if(ctx.Identifier() != null){
+//                this.initializerType = value;
+//            }else if (ctx.Constant() != null){
+//                this.initializerType = "constant";
+//            }else if (ctx.StringLiteral().size() > 0){
+//                this.initializerType = "char";
+//            }
+//        }
     }
 
     @Override
@@ -381,6 +396,23 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void exitDeclaration(CParser.DeclarationContext ctx) {
+//        String typeQual = "";
+//        String typeSpec = ctx.declarationSpecifiers().declarationSpecifier(0).getText();
+//
+//        if(ctx.declarationSpecifiers().declarationSpecifier().size() > 1){
+//            typeQual = ctx.declarationSpecifiers().declarationSpecifier(0).getText();
+//            typeSpec = ctx.declarationSpecifiers().declarationSpecifier(1).getText();
+//        }
+
+//        for (CParser.InitDeclaratorContext initDec:ctx.initDeclaratorList().initDeclarator()) {
+//            var leftOperator = initDec.declarator().directDeclarator();
+//            var rightOperator = initDec.initializer();
+//            if(!initializerType.contains(typeSpec)){
+//                String message = errorHandler.errorMaker(230," Incompatible types :",ctx.start.getLine()
+//                        ,ctx.start.getCharPositionInLine(),typeSpec,"can not be converted");
+//                errorHandler.errors.add(message);
+//            }
+//        }
     }
 
     @Override
@@ -706,12 +738,12 @@ public class ProgramPrinter  implements CListener {
 
     @Override
     public void enterInitializer(CParser.InitializerContext ctx) {
-
+//        init_flag = true;
     }
 
     @Override
     public void exitInitializer(CParser.InitializerContext ctx) {
-
+//        init_flag = false;
     }
 
     @Override
@@ -963,7 +995,6 @@ public class ProgramPrinter  implements CListener {
     public void exitJumpStatement(CParser.JumpStatementContext ctx) {
         if(ctx.Return() != null) {
             this.return_flag = false;
-            System.out.println("qqqqqqqqqqqqqq");
         }
     }
 
@@ -1068,19 +1099,19 @@ public class ProgramPrinter  implements CListener {
         if (this.isReturn_flag){
 
             String type = ctx.typeSpecifier().getText();
-            if (!this.retrunType.contains(type)){
+            if (!this.returnType.contains(type)){
                 String message = errorHandler.errorMaker(210,"",this.lineNum
                         ,this.colNum," Return Type of this method must be ","< " + type + " >");
                 errorHandler.errors.add(message);
             }else
-            if(this.retrunType.equals("constant")){
+            if(this.returnType.equals("constant")){
                 if (!(type.equals("int") || type.equals("double"))){
                     String message = errorHandler.errorMaker(210,"",ctx.start.getCharPositionInLine()
                             ,ctx.start.getCharPositionInLine()," ReturnType of this method must be ","< constant >");
                     errorHandler.errors.add(message);
                 }
             }else
-            if (this.retrunType.equals("char")){
+            if (this.returnType.equals("char")){
                 String message = errorHandler.errorMaker(210,"",ctx.start.getCharPositionInLine()
                         ,ctx.start.getCharPositionInLine()," ReturnType of this method must be ","< char >");
                 errorHandler.errors.add(message);

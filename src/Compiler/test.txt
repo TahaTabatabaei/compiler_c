@@ -19,6 +19,7 @@ void myFunction(int myNumbers[5], char isOdd) {
 char c = 'p' , a ='a';
 int main() {
     double point = 1.9;
+    int a = 9;
     int myNumbers[5] = {10, 20, 30, 40, 50};
     myNum[2] = 3;
     point = 2;
@@ -28,7 +29,7 @@ int main() {
     data = data2;
 
     int point = 2;
-    double x = 2;
+    double x = a;
     return x;
     }
 
