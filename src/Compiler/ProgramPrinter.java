@@ -49,6 +49,17 @@ public class ProgramPrinter  implements CListener {
         return "";
     }
 
+    SymbolTable getScope(String key){
+        SymbolTable st = currentScopes.peek();
+        while (st != null) {
+            if (st.map.containsKey(key)){
+                return st;
+            }
+            st = st.parentNode;
+        }
+        return st;
+    }
+
     // flag to see if we should look for valid return type or not
     boolean return_flag = false;
     // flag to see if we should compare the returnType and function return attribute
@@ -142,6 +153,11 @@ public class ProgramPrinter  implements CListener {
             if (index>0){
                 System.out.println(sb.toString());
             }
+
+//            SymbolTable st = getScope("Method_"+name);
+//            if (st != null){
+//
+//            }
         }
 
 
@@ -1039,7 +1055,7 @@ public class ProgramPrinter  implements CListener {
         }
 
 
-
+        int paramNum = 0;
         StringBuilder checkParam = new StringBuilder();
         if (ctx.declarator().directDeclarator().parameterTypeList() != null){
             checkParam.append(" [parameter list: ");
@@ -1058,6 +1074,7 @@ public class ProgramPrinter  implements CListener {
                 index++;
             }
             checkParam.append("]");
+            paramNum = index;
         }else {
             checkParam.append("approved");
         }
@@ -1078,6 +1095,8 @@ public class ProgramPrinter  implements CListener {
         if (!checkParam.toString().equals("approved")){
             value.append(checkParam);
             tempmethod.paramList = checkParam.toString();
+            tempmethod.paramNum = paramNum;
+            paramNum = 0;
         }
 
         currentScopes.peek().insert(key, value.toString());
