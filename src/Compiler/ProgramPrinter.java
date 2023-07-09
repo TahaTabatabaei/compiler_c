@@ -154,10 +154,20 @@ public class ProgramPrinter  implements CListener {
                 System.out.println(sb.toString());
             }
 
-//            SymbolTable st = getScope("Method_"+name);
-//            if (st != null){
-//
-//            }
+            String key = "Method_"+name;
+            SymbolTable st = getScope(key);
+            if (st instanceof GlobalTable){
+                for (MethodTable mt : ((GlobalTable) st).methods){
+                    if (mt.tableName.equals(key)){
+
+                        if(mt.paramNum != index){
+                            String message = errorHandler.errorMaker(220,"",ctx.start.getLine()
+                                    ,ctx.start.getCharPositionInLine(),"","Mismatch arguments");
+                            errorHandler.errors.add(message);
+                        }
+                    }
+                }
+            }
         }
 
 
